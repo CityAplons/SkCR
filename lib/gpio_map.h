@@ -1,7 +1,7 @@
 /*
  * gpio_map.h
  *
- *  Created on: 8 дек. 2019 г.
+ *  Created on: 8 пїЅпїЅпїЅ. 2019 пїЅ.
  *      Author: Taras.Melnik
  */
 
@@ -74,7 +74,13 @@
 #define RGB_LED_BLUE_PIN            GPIO_Pin_3
 #define RGB_LED_GREEN_PIN           GPIO_Pin_15
 
-
-
+/*
+ * Relay connector pinout
+ */
+#define FL_PORT               	GPIOE
+#define FL_1_PIN             	GPIO_Pin_0
+#define FL_2_PIN            	GPIO_Pin_1
+#define FL_3_PIN           		GPIO_Pin_2
+#define FL_4_PIN           		GPIO_Pin_3
 
 #endif /* LIB_GPIO_MAP_H_ */
