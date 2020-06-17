@@ -18,6 +18,7 @@ public:
 	void set_config(uint8_t mask);
 	void get_config(uint8_t* ret_arr);
 	void get_timeouts(uint8_t* ret_arr);
+	void init_ports();
 	void run();
 
 private:
