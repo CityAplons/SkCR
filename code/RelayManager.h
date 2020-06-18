@@ -11,6 +11,8 @@
 #include "stm32f4xx.h"
 #include "TaskWrapper.h"
 
+#define TURNOFF_TIMEOUT ((uint8_t) 1) // Time in minutes till lamps could be turned off
+
 class RelayManager: public TaskWrapper {
 public:
 	RelayManager();
@@ -23,9 +25,8 @@ public:
 
 private:
 	uint8_t timeout_arr[4];
-	bool current_status[4];
+	uint8_t current_status[4];
 
-	uint8_t translate_status();
 	void switch_relay(uint8_t mask);
 };
 
