@@ -68,6 +68,7 @@ void system_clock_config()
 #include "RangefinderManager.h"
 #include "BatteryManager.h"
 #include "MotorManager.h"
+#include "RelayManager.h"
 #include "I2c1Manager.h"
 #include "LedRgb.h"
 #include "GlobalTimerus.h"
@@ -89,6 +90,8 @@ int main(void) {
         mot_manager.task_create(2048, 1, "Motors");
 
         i2c_manager.task_create(1024, 1, "I2C");
+
+        fl_manager.task_create(256, 1, "FL");
 
         /* Robot LED initialisatin */
         ledRgb.init_led();

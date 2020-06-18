@@ -20,6 +20,7 @@
 #include "RangefinderManager.h"
 #include "MotorManager.h"
 #include "I2c1Manager.h"
+#include "RelayManager.h"
 
 Terminal terminal;
 static DriverUsart uart_6;
@@ -97,6 +98,18 @@ void Terminal::run()
         } else if (commad == HighLvlCommand::GET_ANG_VEL) {
             i2c_manager.get_angular_velocity(uart_tx_arr);
             answerLength = 12;
+
+        } else if (commad == HighLvlCommand::SET_FL_CONFIG) {
+        	uart_rx_arr[0] = uart_6.usart_receive_byte();
+        	fl_manager.set_config(uart_rx_arr[0]);
+
+        } else if (commad == HighLvlCommand::GET_FL_CONFIG) {
+        	fl_manager.get_config(uart_tx_arr);
+        	answerLength = 1;
+
+        } else if (commad == HighLvlCommand::GET_FL_TIMEOUTS) {
+        	fl_manager.get_timeouts(uart_tx_arr);
+        	answerLength = 4;
 
         } else {
             uart_tx_arr[0] = 0xff;
