@@ -102,6 +102,7 @@ void Terminal::run()
         } else if (commad == HighLvlCommand::SET_FL_CONFIG) {
         	uart_rx_arr[0] = uart_6.usart_receive_byte();
         	fl_manager.set_config(uart_rx_arr[0]);
+        	answerLength = 1;
 
         } else if (commad == HighLvlCommand::GET_FL_CONFIG) {
         	fl_manager.get_config(uart_tx_arr);

@@ -84,9 +84,39 @@ void RelayManager::switch_relay(uint8_t mask)
 	for (uint8_t i = 0; i < 4; i++)
 	{
 		if ((mask >> i)  & 0x01) {
-			GPIO_SetBits(GPIOE,i);
+			switch (i){
+				case 0:
+					GPIO_SetBits(GPIOD,GPIO_Pin_12);
+					break;
+				case 1:
+					GPIO_SetBits(GPIOD,GPIO_Pin_13);
+					break;
+				case 2:
+					GPIO_SetBits(GPIOD,GPIO_Pin_14);
+					break;
+				case 3:
+					GPIO_SetBits(GPIOD,GPIO_Pin_15);
+					break;
+				default:
+					break;
+			}
 	    } else {
-	    	GPIO_ResetBits(GPIOE,i);
+	    	switch (i){
+	    		case 0:
+	    			GPIO_ResetBits(GPIOD,GPIO_Pin_12);
+	    			break;
+	    		case 1:
+	    			GPIO_ResetBits(GPIOD,GPIO_Pin_13);
+	    			break;
+	    		case 2:
+	    			GPIO_ResetBits(GPIOD,GPIO_Pin_14);
+	    			break;
+	    		case 3:
+	    			GPIO_ResetBits(GPIOD,GPIO_Pin_15);
+	    			break;
+	    		default:
+	    			break;
+	    	}
 	    }
 	}
 
@@ -97,36 +127,40 @@ void RelayManager::init_ports()
 		/*
 		 * Configuring port E bits 0...3 for relay switching
 		 */
-        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+        RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
 
         GPIO_InitTypeDef fl_pin0;
         GPIO_StructInit(&fl_pin0);
-        fl_pin0.GPIO_Pin = GPIO_Pin_0;
+        fl_pin0.GPIO_Pin = GPIO_Pin_12;
         fl_pin0.GPIO_Mode = GPIO_Mode_OUT;
-        GPIO_Init(GPIOE,&fl_pin0);
+        fl_pin0.GPIO_OType = GPIO_OType_PP;
+        GPIO_Init(GPIOD,&fl_pin0);
 
         GPIO_InitTypeDef fl_pin1;
         GPIO_StructInit(&fl_pin1);
-        fl_pin1.GPIO_Pin = GPIO_Pin_1;
+        fl_pin1.GPIO_Pin = GPIO_Pin_13;
         fl_pin1.GPIO_Mode = GPIO_Mode_OUT;
-        GPIO_Init(GPIOE,&fl_pin1);
+        fl_pin1.GPIO_OType = GPIO_OType_PP;
+        GPIO_Init(GPIOD,&fl_pin1);
 
         GPIO_InitTypeDef fl_pin2;
         GPIO_StructInit(&fl_pin2);
-        fl_pin2.GPIO_Pin = GPIO_Pin_2;
+        fl_pin2.GPIO_Pin = GPIO_Pin_14;
         fl_pin2.GPIO_Mode = GPIO_Mode_OUT;
-        GPIO_Init(GPIOE,&fl_pin2);
+        fl_pin2.GPIO_OType = GPIO_OType_PP;
+        GPIO_Init(GPIOD,&fl_pin2);
 
         GPIO_InitTypeDef fl_pin3;
         GPIO_StructInit(&fl_pin3);
-        fl_pin3.GPIO_Pin = GPIO_Pin_3;
+        fl_pin3.GPIO_Pin = GPIO_Pin_15;
         fl_pin3.GPIO_Mode = GPIO_Mode_OUT;
-        GPIO_Init(GPIOE,&fl_pin3);
+        fl_pin3.GPIO_OType = GPIO_OType_PP;
+        GPIO_Init(GPIOD,&fl_pin3);
 
-        GPIO_ResetBits(GPIOE,0);
-        GPIO_ResetBits(GPIOE,1);
-        GPIO_ResetBits(GPIOE,2);
-        GPIO_ResetBits(GPIOE,3);
+        GPIO_ResetBits(GPIOD,GPIO_Pin_12);
+        GPIO_ResetBits(GPIOD,GPIO_Pin_13);
+        GPIO_ResetBits(GPIOD,GPIO_Pin_14);
+        GPIO_ResetBits(GPIOD,GPIO_Pin_15);
 
 }
 
