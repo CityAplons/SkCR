@@ -14,7 +14,7 @@
 #define MIN_RESPONCE_TIME 		    ((uint8_t) 250)	// ms. got from datasheet for ultrasonic rangefinders
 #define MAX_RANGEFINDERS_DISTANCE 	((uint8_t) 50) 	// sm. rangefinders distance for collision (got from Misha)
 #define QUEUE_IS_EMPTY			    ((uint8_t) 0)
-#define RANGEFINDERS_NUMBER		    ((uint8_t) 6)	// number of rangefinders we use
+#define RANGEFINDERS_NUMBER		    ((uint8_t) 10)	// number of rangefinders we use
 
 // filtration empiric constant
 #define CONST_HISTOR_ARR		    ((uint8_t) 15)	//size of array for previous collision data

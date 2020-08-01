@@ -18,6 +18,7 @@ RelayManager fl_manager;
 RelayManager::RelayManager() {
 	// TODO Auto-generated constructor stub
 	uint8_t arr[4] = {0,0,0,0};
+	last_value = 0;
 	memcpy(timeout_arr,arr,4);
 	memcpy(current_status,arr,4);
 }
@@ -33,7 +34,7 @@ void RelayManager::set_config(uint8_t mask)
 	{
 		if ((modified_mask >> i)  & 0x01) {
 			current_status[i] = 1;
-			timeout_arr[i] = TURNOFF_TIMEOUT;
+			if (!(last_value >> i)&0x01) timeout_arr[i] = TURNOFF_TIMEOUT;
 		} else {	// Check where bit is 0
 			current_status[i] = 0;
 			// Setting this bit if timeout is not pass - lamp still turned on
@@ -44,6 +45,7 @@ void RelayManager::set_config(uint8_t mask)
 		}
 	}
 	// Applying mask
+	last_value = modified_mask;
 	switch_relay(modified_mask);
 }
 

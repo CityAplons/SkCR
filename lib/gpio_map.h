@@ -69,7 +69,7 @@
 /*
  * RGB LED pinout
  */
-#define RGB_LED_PORT                GPIOC
+#define RGB_LED_PORT                GPIOA
 #define RGB_LED_RED_PIN             GPIO_Pin_2
 #define RGB_LED_BLUE_PIN            GPIO_Pin_3
 #define RGB_LED_GREEN_PIN           GPIO_Pin_15

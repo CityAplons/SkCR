@@ -87,7 +87,7 @@ int main(void) {
 
         rf_manager.task_create(512, 1, "Rangefinder");
 
-        mot_manager.task_create(2048, 1, "Motors");
+        //mot_manager.task_create(2048, 1, "Motors");
 
         i2c_manager.task_create(1024, 1, "I2C");
 

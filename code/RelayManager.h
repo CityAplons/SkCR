@@ -26,6 +26,7 @@ public:
 private:
 	uint8_t timeout_arr[4];
 	uint8_t current_status[4];
+	uint8_t last_value;
 
 	void switch_relay(uint8_t mask);
 };
