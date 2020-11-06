@@ -19,7 +19,7 @@
 
 class BatteryManager: public TaskWrapper {
 public:
-        BatteryManager();
+    BatteryManager();
 	virtual ~BatteryManager();
 
 	void init_adc();

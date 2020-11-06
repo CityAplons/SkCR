@@ -83,15 +83,31 @@ void RangefinderManager::init_interrupt()
 
         /* Configuration of port E pins */
         GPIO_StructInit(&rf_pin);
-        rf_pin.GPIO_OType = GPIO_OType_OD;
-        rf_pin.GPIO_PuPd = GPIO_PuPd_DOWN;
+        rf_pin.GPIO_Mode = GPIO_Mode_IN;
+        rf_pin.GPIO_OType = GPIO_OType_PP;
+        rf_pin.GPIO_PuPd = GPIO_PuPd_NOPULL;
         rf_pin.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_8 |GPIO_Pin_9 |
         				GPIO_Pin_10 | GPIO_Pin_11 |GPIO_Pin_12 |
                         GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
         GPIO_Init(GPIOE, &rf_pin);
 
+        rf_pin.GPIO_Mode = GPIO_Mode_IN;
+        rf_pin.GPIO_OType = GPIO_OType_PP;
+        rf_pin.GPIO_PuPd = GPIO_PuPd_NOPULL;
         rf_pin.GPIO_Pin = GPIO_Pin_5;
         GPIO_Init(GPIOB, &rf_pin);
+
+        rf_nvic.NVIC_IRQChannel = EXTI15_10_IRQn;
+        rf_nvic.NVIC_IRQChannelPreemptionPriority = 0x1;
+        rf_nvic.NVIC_IRQChannelSubPriority = 0x0;
+        rf_nvic.NVIC_IRQChannelCmd = ENABLE;
+        NVIC_Init(&rf_nvic);
+
+		rf_nvic.NVIC_IRQChannel = EXTI9_5_IRQn;
+		rf_nvic.NVIC_IRQChannelPreemptionPriority = 0x1;
+		rf_nvic.NVIC_IRQChannelSubPriority = 0x0;
+		rf_nvic.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init(&rf_nvic);
 
         /* Connect EXTI Lines to pins */
         SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOB, EXTI_PinSource5);
@@ -108,18 +124,13 @@ void RangefinderManager::init_interrupt()
         /* Set EXTI lines */
         EXTI_StructInit(&rf_interrupt);
         rf_interrupt.EXTI_Line =  EXTI_Line5 | EXTI_Line7 | EXTI_Line8| EXTI_Line9 |
-        				EXTI_Line10 | EXTI_Line11| EXTI_Line12 |
-                        EXTI_Line13 | EXTI_Line14 | EXTI_Line15;
+                				EXTI_Line10 | EXTI_Line11| EXTI_Line12 |
+                                EXTI_Line13 | EXTI_Line14 | EXTI_Line15;
         rf_interrupt.EXTI_Mode = EXTI_Mode_Interrupt;
         rf_interrupt.EXTI_Trigger = EXTI_Trigger_Falling;
         rf_interrupt.EXTI_LineCmd = ENABLE;
         EXTI_Init(&rf_interrupt);
-
-        rf_nvic.NVIC_IRQChannel = EXTI15_10_IRQn | EXTI9_5_IRQn;
-        rf_nvic.NVIC_IRQChannelPreemptionPriority = 0x01;
-        rf_nvic.NVIC_IRQChannelSubPriority = 0x01;
-        rf_nvic.NVIC_IRQChannelCmd = ENABLE;
-        NVIC_Init(&rf_nvic);
+        __enable_irq();
 }
 
 void RangefinderManager::init_timer()
@@ -217,74 +228,80 @@ void RangefinderManager::run()
                 vTaskDelayUntil(&xLastWakeTime, MIN_RESPONCE_TIME);
         }
 }
-
-extern "C"
-{
-void EXTI9_5_IRQHandler() {
-	 if (EXTI_GetITStatus(EXTI_Line5) == 1) {
-		 EXTI_ClearITPendingBit(EXTI_Line5);
-	     if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-	    	 sensTimeArr[1] = TIM_GetCounter(TIM6);
-	     else
-	         sensTimeArr[1] = 0xff;
-	 } else if (EXTI_GetITStatus(EXTI_Line7) == 1) {
-	     EXTI_ClearITPendingBit(EXTI_Line7);
-	     if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-	          sensTimeArr[2] = TIM_GetCounter(TIM6);
-	     else
-	          sensTimeArr[2] = 0xff;
-	 } else if (EXTI_GetITStatus(EXTI_Line8) == 1) {
-	     EXTI_ClearITPendingBit(EXTI_Line8);
-	     if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-	           sensTimeArr[3] = TIM_GetCounter(TIM6);
-	     else
-	           sensTimeArr[3] = 0xff;
-	 } else if (EXTI_GetITStatus(EXTI_Line9) == 1) {
-		 EXTI_ClearITPendingBit(EXTI_Line9);
-	     if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-	            sensTimeArr[4] = TIM_GetCounter(TIM6);
-	     else
-	            sensTimeArr[4] = 0xff;
+extern "C" {
+	void EXTI9_5_IRQHandler(void){
+		 if (EXTI_GetITStatus(EXTI_Line5) == 1) {
+			 EXTI_ClearITPendingBit(EXTI_Line5);
+			 if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+				 sensTimeArr[0] = TIM_GetCounter(TIM6);
+			 else
+				 sensTimeArr[0] = 0xff;
+		 }
+		 if (EXTI_GetITStatus(EXTI_Line7) == 1) {
+			 EXTI_ClearITPendingBit(EXTI_Line7);
+			 if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+				  sensTimeArr[2] = TIM_GetCounter(TIM6);
+			 else
+				  sensTimeArr[2] = 0xff;
+		 }
+		 if (EXTI_GetITStatus(EXTI_Line8) == 1) {
+			 EXTI_ClearITPendingBit(EXTI_Line8);
+			 if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+				   sensTimeArr[3] = TIM_GetCounter(TIM6);
+			 else
+				   sensTimeArr[3] = 0xff;
+		 }
+		 if (EXTI_GetITStatus(EXTI_Line9) == 1) {
+			 EXTI_ClearITPendingBit(EXTI_Line9);
+			 if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+					sensTimeArr[4] = TIM_GetCounter(TIM6);
+			 else
+					sensTimeArr[4] = 0xff;
+		}
 	}
-}
 
-void EXTI15_10_IRQHandler(){
-        if (EXTI_GetITStatus(EXTI_Line10)) {
-                EXTI_ClearITPendingBit(EXTI_Line10);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[0] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[0] = 0xff;
-        } else if (EXTI_GetITStatus(EXTI_Line11) == 1) {
-                EXTI_ClearITPendingBit(EXTI_Line11);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[1] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[1] = 0xff;
-        } else if (EXTI_GetITStatus(EXTI_Line12) == 1) {
-                EXTI_ClearITPendingBit(EXTI_Line12);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[2] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[2] = 0xff;
-        } else if (EXTI_GetITStatus(EXTI_Line13) == 1) {
-                EXTI_ClearITPendingBit(EXTI_Line13);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[3] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[3] = 0xff;
-        } else if (EXTI_GetITStatus(EXTI_Line14) == 1) {
-                EXTI_ClearITPendingBit(EXTI_Line14);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[4] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[4] = 0xff;
-        } else if (EXTI_GetITStatus(EXTI_Line15) == 1) {
-                EXTI_ClearITPendingBit(EXTI_Line15);
-                if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
-                        sensTimeArr[5] = TIM_GetCounter(TIM6);
-                else
-                        sensTimeArr[5] = 0xff;
-        }
-}
+	void EXTI15_10_IRQHandler(){
+			if (EXTI_GetITStatus(EXTI_Line10) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line10);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[5] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[5] = 0xff;
+			}
+			if (EXTI_GetITStatus(EXTI_Line11) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line11);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[6] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[6] = 0xff;
+			}
+			if (EXTI_GetITStatus(EXTI_Line12) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line12);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[7] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[7] = 0xff;
+			}
+			if (EXTI_GetITStatus(EXTI_Line13) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line13);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[8] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[8] = 0xff;
+			}
+			if (EXTI_GetITStatus(EXTI_Line14) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line14);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[9] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[9] = 0xff;
+			}
+			if (EXTI_GetITStatus(EXTI_Line15) == 1) {
+					EXTI_ClearITPendingBit(EXTI_Line15);
+					if (TIM_GetCounter(TIM6) > 500 && TIM_GetCounter(TIM6) < 3250)
+							sensTimeArr[1] = TIM_GetCounter(TIM6);
+					else
+							sensTimeArr[1] = 0xff;
+			}
+	}
 }

@@ -40,6 +40,9 @@ private:
 
     static uint8_t outDistArr[RANGEFINDERS_NUMBER];
     static uint8_t  *sensDistArr[RANGEFINDERS_NUMBER];
+
+    void EXTI9_5_IRQHandler();
+    void EXTI15_10_IRQHandler();
 };
 extern RangefinderManager rf_manager;
 

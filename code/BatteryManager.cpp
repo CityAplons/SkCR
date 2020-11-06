@@ -35,8 +35,7 @@ void BatteryManager::init_adc()
         GPIO_InitTypeDef pin_batt;
         GPIO_StructInit(&pin_batt);
         pin_batt.GPIO_Pin = GPIO_Pin_0;
-        pin_batt.GPIO_OType = GPIO_OType_OD;
-        pin_batt.GPIO_PuPd = GPIO_PuPd_DOWN;
+        pin_batt.GPIO_PuPd = GPIO_PuPd_NOPULL;
         pin_batt.GPIO_Mode = GPIO_Mode_AN;
         GPIO_Init(GPIOC, &pin_batt);
 
@@ -44,19 +43,27 @@ void BatteryManager::init_adc()
         ADC_CommonInitTypeDef  adc_common;
         ADC_CommonStructInit(&adc_common);
         adc_common.ADC_Prescaler = ADC_Prescaler_Div8;
+        adc_common.ADC_Mode = ADC_Mode_Independent;
         ADC_CommonInit(&adc_common);
 
         /* ADC1 settings */
         ADC_InitTypeDef adc_1;
         ADC_StructInit(&adc_1);
-        adc_1.ADC_Resolution = ADC_Resolution_12b;
-        ADC_Init(ADC1, &adc_1);
+        adc_1.ADC_Resolution = ADC_Resolution_8b;
+        adc_1.ADC_ScanConvMode = DISABLE;
+        adc_1.ADC_ContinuousConvMode = ENABLE;  // we work in continuous sampling mode
+        adc_1.ADC_DataAlign = ADC_DataAlign_Right;
+
 
         /* Specific Channel setting */
-        ADC_RegularChannelConfig(ADC1, ADC_Channel_10, ADC_RANK, ADC_SampleTime_84Cycles);
+        ADC_RegularChannelConfig(ADC1, ADC_Channel_10, ADC_RANK, ADC_SampleTime_15Cycles);
+
+        ADC_Init(ADC1, &adc_1);
 
         /* To Turn on ADC1 */
         ADC_Cmd(ADC1, ENABLE);
+
+        ADC_SoftwareStartConv(ADC1);
 }
 
 uint8_t BatteryManager::get_charge()
@@ -74,6 +81,8 @@ void BatteryManager::run()
         uint16_t buffAverege = 0;
         uint8_t k = 0;
         float perKoef = (hBorder - lBorder)/100.f;
+        init_adc();
+        while(ADC_GetSoftwareStartConvStatus(ADC1) != RESET){buffAverege = 0;}
         buffAverege = ADC_GetConversionValue(ADC1);
         for (uint8_t i = 0; i < 10; i++){
                 buffArray[i] = buffAverege;
@@ -87,6 +96,8 @@ void BatteryManager::run()
                         buffArray[i] = buffArray[i-1];
                         buffAverege += buffArray[i];
                 }
+                //ADC_SoftwareStartConv(ADC1);
+                while(ADC_GetSoftwareStartConvStatus(ADC1) != RESET){buffArray[0] = 0;}
                 buffArray[0] = ADC_GetConversionValue(ADC1);
                 buffAverege += buffArray[0];
                 ChargeVal = buffAverege / 10;
@@ -105,8 +116,7 @@ void BatteryManager::run()
                         ChargeVal = lBorder;
                 ChargeVal_P = uint8_t (ChargeVal - lBorder)/perKoef;
 
-                ADC_SoftwareStartConv(ADC1);
-                vTaskDelay(5000);
+                vTaskDelay(500);
         }
 }
 
